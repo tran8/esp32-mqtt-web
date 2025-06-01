@@ -23,17 +23,17 @@
     const client = mqtt.connect("wss://084c6c698e3047bdbcdc9b946b24bdc3.s1.eu.hivemq.cloud:8884/mqtt", options);
 
     client.on('connect', () => {
-      client.subscribe("esp32/adc");
+      client.subscribe("esp32_a/adc");
     });
 
     client.on('message', (topic, message) => {
-      if (topic === "esp32/adc") {
+      if (topic === "esp32_a/adc") {
         document.getElementById("adcValue").innerText = message.toString();
       }
     });
 
     function controlLED(state) {
-      client.publish("esp32/led", state);
+      client.publish("esp32_a/led", state);
     }
   </script>
 </body>
