@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ESP32 Control ATLANTIC</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+</head>
+<body>
+  <h2>Điều khiển LED</h2>
+  <button onclick="controlLED('ON')">BẬT LED</button>
+  <button onclick="controlLED('OFF')">TẮT LED</button>
+
+  <h3>Giá trị ADC:</h3>
+  <div id="adcValue">---</div>
+
+  <script>
+    const options = {
+      username: "esp32_a",
+      password: "123456789Ab",
+      connectTimeout: 4000,
+      clean: true,
+      reconnectPeriod: 4000,
+    };
+    const client = mqtt.connect("wss://084c6c698e3047bdbcdc9b946b24bdc3.s1.eu.hivemq.cloud:8884/mqtt", options);
+
+    client.on('connect', () => {
+      client.subscribe("esp32/adc");
+    });
+
+    client.on('message', (topic, message) => {
+      if (topic === "esp32/adc") {
+        document.getElementById("adcValue").innerText = message.toString();
+      }
+    });
+
+    function controlLED(state) {
+      client.publish("esp32/led", state);
+    }
+  </script>
+</body>
+</html>
