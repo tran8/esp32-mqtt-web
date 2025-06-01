@@ -1,51 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>ESP32 MQTT Dashboard</title>
+  <meta charset="UTF-8" />
+  <title>ESP32 MQTT LED ĐIỀU KHIỂN</title>
   <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
   <style>
-    body { font-family: sans-serif; text-align: center; margin-top: 40px; }
-    button { padding: 10px 20px; margin: 10px; font-size: 16px; }
-    #adcValue { font-size: 24px; margin-top: 20px; }
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 50px;
+      background: #f0f0f0;
+    }
+    h1 {
+      margin-bottom: 30px;
+    }
+    button {
+      font-size: 18px;
+      padding: 10px 20px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #onBtn {
+      background-color: #4CAF50;
+      color: white;
+    }
+    #offBtn {
+      background-color: #f44336;
+      color: white;
+    }
   </style>
 </head>
 <body>
-  <h1>ESP32 MQTT Dashboard</h1>
-  
-  <button onclick="publishMessage('esp32/led', 'on')">🔆 Bật LED</button>
-  <button onclick="publishMessage('esp32/led', 'off')">💡 Tắt LED</button>
-
-  <div id="adcValue">Giá trị ADC: --</div>
+  <h1>Điều khiển LED qua MQTT</h1>
+  <button id="onBtn" onclick="sendCommand('on')">BẬT LED</button>
+  <button id="offBtn" onclick="sendCommand('off')">TẮT LED</button>
 
   <script>
-    // Cấu hình MQTT
     const options = {
-      username: "esp32_a",
-      password: "123456789Ab",
       connectTimeout: 4000,
-      clean: true,
-      reconnectPeriod: 4000,
+      clientId: 'web_' + Math.random().toString(16).substr(2, 8),
     };
-    const client = mqtt.connect("wss://084c6c698e3047bdbcdc9b946b24bdc3.s1.eu.hivemq.cloud:8884/mqtt", options);
 
+    const client = mqtt.connect('wss://broker.hivemq.com:8884/mqtt', options);
 
     client.on('connect', () => {
-      console.log('✅ Đã kết nối HiveMQ Broker');
-      client.subscribe(topicADC, (err) => {
-        if (!err) console.log('📥 Subscribed topic:', topicADC);
-      });
+      console.log('Web connected to HiveMQ');
     });
 
-    client.on('message', (topic, message) => {
-      if (topic === topicADC) {
-        document.getElementById('adcValue').innerText = 'Giá trị ADC: ' + message.toString();
-      }
+    client.on('error', (err) => {
+      console.error('Connection error: ', err);
     });
 
-    function publishMessage(topic, payload) {
-      client.publish(topic, payload);
-      console.log(`📤 Gửi "${payload}" đến ${topic}`);
+    function sendCommand(cmd) {
+      client.publish("esp32/led", cmd);
+      console.log("Gửi lệnh:", cmd);
     }
   </script>
 </body>
